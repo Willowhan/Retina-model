@@ -1,0 +1,45 @@
+import cv2 as cv
+
+video_path = 'E:\\dissertation\\simulation\\video\\cat.mp4'
+capture = cv.VideoCapture(video_path)
+succeed, inputImage = capture.read()
+
+# Gets the frame rate of the video
+fps = capture.get(cv.CAP_PROP_FPS)
+print(f"fps/Frame Rate: {fps}")
+total_frames = int(capture.get(cv.CAP_PROP_FRAME_COUNT))
+print(f"Total number of video frames: {total_frames}")
+
+retina = cv.bioinspired_Retina.create((inputImage.shape[1], inputImage.shape[0]))
+
+retina.write('retinaParams.xml')
+
+retina.setup('retinaParams.xml')
+
+
+while capture.isOpened():               # When the video is turned on
+    ret, frame = capture.read()  # A read frame is stored in the frame. If the read succeeds, ret is True, otherwise False
+    if ret:
+        cv.imshow('Frame', frame)
+        if cv.waitKey(1) & 0xFF == ord('q'):
+            break
+    if not ret:
+        break
+
+    # run retina on the input image
+    retina.run(frame)
+
+    # grab retina outputs
+    retinaOut_parvo = retina.getParvo()
+    retinaOut_magno = retina.getMagno()
+
+    # draw retina outputs
+    cv.imshow('retina parvo out', retinaOut_parvo)
+    cv.imshow('retina magno out', retinaOut_magno)
+
+    # wait a little to let the time for figures to be drawn
+    cv.waitKey(2)
+
+
+capture.release()
+cv.destroyAllWindows()
