@@ -2,6 +2,11 @@ import numpy as np
 import cv2
 import time
 
+"""
+视频初始时由于时域滤波中previous_input 和 amacrine_cells_temp_output 这两个初始状态的不稳定性，导致滤波器输出极端值
+故初始几帧内采用渐进调整的方式逐步引入时域滤波,以消除初始时的黑色伪影
+"""
+
 class VideoProcessor:
     def __init__(self, temporal_coefficient,warmup_frames=10):
         self.temporal_coefficient = temporal_coefficient
