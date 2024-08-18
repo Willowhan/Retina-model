@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import os
 '''
-只提取动态部分，静态部分消失
+只提取动态部分，静态部分消失，但没有考虑on off
 '''
 
 class VideoProcessor:
@@ -21,8 +21,9 @@ class VideoProcessor:
             self.amacrine_cells_temp_output = np.zeros_like(current_frame)
 
         # 计算当前帧和前一帧的差异
-        amacrine_cells_temp = (current_frame - self.previous_input).astype(np.int16)
-        self.previous_input = current_frame.astype(np.uint8)
+        # amacrine_cells_temp = (current_frame - self.previous_input).astype(np.int16)
+        amacrine_cells_temp = current_frame.astype(np.int16) - self.previous_input.astype(np.int16)
+        self.previous_input = current_frame
 
         # 只保留差异大于阈值的部分
         self.amacrine_cells_temp_output = np.where(np.abs(amacrine_cells_temp) > self.threshold,amacrine_cells_temp, 0).astype(np.uint8)
@@ -42,7 +43,7 @@ class VideoProcessor:
         dynamic_part = np.maximum(dynamic_part, 0)
 
         # 去除噪声
-        dynamic_part = self.remove_noise(dynamic_part)
+        # dynamic_part = self.remove_noise(dynamic_part)
 
         return dynamic_part
 
@@ -60,7 +61,7 @@ def process_video(video_path):
 
     temporal_coefficient = 0.9
     threshold = 50
-    noise_removal_size = 5
+    noise_removal_size = 3
     processor = VideoProcessor(temporal_coefficient, threshold, noise_removal_size=noise_removal_size)
 
     frame_counter = 0
